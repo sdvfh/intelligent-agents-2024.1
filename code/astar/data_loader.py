@@ -7,11 +7,11 @@ class DataLoader():
         # Dataframe com distancias reais para calcular g(n) = distancia de n ao no inicial
         real_dist = self._load_csv(real_dist_path)
 
-        # Dataframe com distancias em linha reta h(n) = distancia estimada de n ao nó final
+        # Dataframe com distancias em linha reta h(n) = distancia estimada de n ao no final
         direct_dist = self._load_csv(direct_dist_path)
 
-        self.real_dist = {"df": real_dist, "dict": self._df_to_dict(real_dist)}
-        self.direct_dist = {"df": direct_dist, "dict": self._df_to_dict(direct_dist)}
+        self.real_dist = self._df_to_dict(real_dist)
+        self.direct_dist = self._df_to_dict(direct_dist)
 
     @staticmethod
     def _load_csv(path):
@@ -29,7 +29,10 @@ class DataLoader():
         for current_node, line in df.iterrows():
             line = line[line > 0]
             for neighbour, distance in line.items():
-                if current_node not in actual_dict:  # Se o nó atual não está no dicionário de vizinhos
+                if current_node not in actual_dict:  # Se o no atual nao esta no dicionario de vizinhos
                     actual_dict[current_node] = {}
                 actual_dict[current_node][neighbour] = distance
         return actual_dict
+
+    def return_dicts(self):
+        return self.real_dist, self.direct_dist

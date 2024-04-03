@@ -2,25 +2,24 @@ from .data_loader import DataLoader
 
 
 class Astar():
-    def __init__(self, real_dist_path, straightline_dist_path):
-        self.neighbors_dict, self.straightline_distances = DataLoader(real_dist_path,
-                                                                      straightline_dist_path).return_dicts()
+    def __init__(self, real_dist_path, direct_dist_path):
+        self.neighbors, self.direct_dist = DataLoader(real_dist_path, direct_dist_path).return_dicts()
         self.frontier = {}
         self.start_node = None
         self.goal_node = None
 
     def neighbors(self, node):
-        return list(self.neighbors_dict[node].keys())
+        return list(self.neighbors[node].keys())
 
     def straight_distance_between(self, n1, n2):
         if n1 == n2:
             return 0
-        return self.straightline_distances[n1][n2]
+        return self.direct_dist[n1][n2]
 
     def real_distance_between(self, n1, n2):
         if n1 == n2:
             return 0
-        return self.neighbors_dict[n1][n2]
+        return self.neighbors[n1][n2]
 
     def heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node):
         # Current total distance + real distance between current node and next node + straight distance between next node and goal node
