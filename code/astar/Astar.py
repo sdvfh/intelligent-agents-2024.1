@@ -1,12 +1,12 @@
 from .data_loader import DataLoader
 
-
 class Astar():
-    def __init__(self, real_dist_path, direct_dist_path):
+    def __init__(self, real_dist_path, direct_dist_path,node_lines_path):
         self.start_node = None
         self.goal_node = None
         self._frontier = {}
-        self._real_dist, self._direct_dist = DataLoader(real_dist_path, direct_dist_path).return_dicts()
+        self._real_dist, self._direct_dist,self.node_lines = DataLoader(real_dist_path, direct_dist_path,node_lines_path).return_dicts()
+        
 
     def calculate_A_star(self, start_node, goal_node):
         self.start_node = start_node
@@ -33,7 +33,7 @@ class Astar():
                 text = "Selected"
 
 
-            print(f"{text} node: {current_node} | f: {f} | g: {g} | h: {h} | path: {full_path}\n")
+            print(f"{text} node: {current_node} | f: {f:.2f} | g: {g:.2f} | h: {h:.2f} | path: {full_path}\n")
 
             if found_node:
                 break
@@ -41,11 +41,13 @@ class Astar():
             del self._frontier[current_node]
 
             for neighbor_node in self._get_neighbors(current_node):
+                line_change = self._verify_line_change(full_path[-1],current_node,neighbor_node)
                 node_cost, heuristic_cost, new_total_distance = self._heuristic_cost_estimate(
                     f,
                     current_node,
                     neighbor_node,
-                    self.goal_node
+                    self.goal_node,
+                    line_change
                 )
                 self._update_frontier(
                     node=neighbor_node,
@@ -97,9 +99,25 @@ class Astar():
             return 0
         return self._real_dist[n1][n2]
 
-    def _heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node):
+    def _verify_line_change(self,previous_node,current_node,next_node):
+
+        # Intersecção entre as linhas do nó anterior e do nó atual - linhas que podemos estar chegando
+        arrival_lines = self.node_lines[previous_node].intersection(self.node_lines[current_node])
+
+        # Intersecção entre as linhas do nó atual e do próximo nó - linhas pelas quais podemos partir
+        departure_lines = self.node_lines[current_node].intersection(self.node_lines[next_node])
+
+        # Se não há sobreposição entre as linhas de chegada e partida, precisamos de uma baldeação
+        if arrival_lines.isdisjoint(departure_lines):
+            print(f"Baldeação necessária para ir de {current_node} para {next_node}, vindo de {previous_node}")
+            return True
+        return False 
+    
+    def _heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node,line_change=False):
         # Current total distance + real distance between current node and next node + straight distance between next node and goal node
         new_total_distance = current_total_distance + self._real_distance_between(current_node, next_node)
+        if line_change:
+            new_total_distance += 3
         heuristic_cost = self._straight_distance_between(next_node, goal_node)
         node_cost = new_total_distance + heuristic_cost
         return node_cost, heuristic_cost, new_total_distance
