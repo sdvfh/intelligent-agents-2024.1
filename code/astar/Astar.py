@@ -13,10 +13,15 @@ class Astar():
         self.goal_node = goal_node
         self.create_initial_frontier()
 
-        while True:
-            # TODO: ordernar os nos da fronteira de maneira decrescente do custo
-            # duvida: Em algumas etapas o caminho nao e atualizado, por que?
-            print(f'Current frontier nodes: {list(self._frontier.keys())}')
+        while True:            
+
+            # Sort the items of the dictionary based on the 'f' value
+            sorted_items = sorted(self._frontier.items(), key=lambda x: x[1]['f'])
+
+            # Create an auxiliary dictionary with the sorted order
+            aux_dict = {key: value['f'] for key, value in sorted_items}
+
+            print(f'Current frontier nodes: {aux_dict}')
 
             current_node = min(self._frontier, key=lambda k: self._frontier[k]["f"])
 
@@ -120,4 +125,4 @@ class Astar():
             new_total_distance += 3
         heuristic_cost = self._straight_distance_between(next_node, goal_node)
         node_cost = new_total_distance + heuristic_cost
-        return node_cost, heuristic_cost, new_total_distance
+        return round(node_cost,2), round(heuristic_cost,2), round(new_total_distance,2)

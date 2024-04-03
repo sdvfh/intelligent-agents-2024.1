@@ -34,8 +34,8 @@ class DataLoader():
                 if current_node not in actual_dict:  # Se o no atual nao esta no dicionario de vizinhos
                     actual_dict[current_node] = {}
                 # Tempo = distancia / velocidade media * 60 para transformar em minutos
-                actual_dict[current_node][neighbour] = (distance / mean_speed) * 60
-        
+                actual_dict[current_node][neighbour] = round((distance / mean_speed) * 60, 2)
+    
         return actual_dict
     
     @staticmethod
