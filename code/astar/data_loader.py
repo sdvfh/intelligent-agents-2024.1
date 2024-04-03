@@ -10,8 +10,8 @@ class DataLoader():
         # Dataframe com distancias em linha reta h(n) = distancia estimada de n ao no final
         direct_dist = self._load_csv(direct_dist_path)
 
-        self.real_dist = self._df_to_dict(real_dist)
-        self.direct_dist = self._df_to_dict(direct_dist)
+        self._real_dist = self._df_to_dict(real_dist)
+        self._direct_dist = self._df_to_dict(direct_dist)
 
     @staticmethod
     def _load_csv(path):
@@ -35,4 +35,4 @@ class DataLoader():
         return actual_dict
 
     def return_dicts(self):
-        return self.real_dist, self.direct_dist
+        return self._real_dist, self._direct_dist

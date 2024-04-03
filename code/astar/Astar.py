@@ -3,59 +3,103 @@ from .data_loader import DataLoader
 
 class Astar():
     def __init__(self, real_dist_path, direct_dist_path):
-        self.neighbors, self.direct_dist = DataLoader(real_dist_path, direct_dist_path).return_dicts()
-        self.frontier = {}
         self.start_node = None
         self.goal_node = None
-
-    def neighbors(self, node):
-        return list(self.neighbors[node].keys())
-
-    def straight_distance_between(self, n1, n2):
-        if n1 == n2:
-            return 0
-        return self.direct_dist[n1][n2]
-
-    def real_distance_between(self, n1, n2):
-        if n1 == n2:
-            return 0
-        return self.neighbors[n1][n2]
-
-    def heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node):
-        # Current total distance + real distance between current node and next node + straight distance between next node and goal node
-        new_total_distance = current_total_distance + self.real_distance_between(current_node, next_node)
-        heuristic_cost = self.straight_distance_between(next_node, goal_node)
-        node_cost = new_total_distance + heuristic_cost
-        return node_cost, heuristic_cost, new_total_distance
-
-    def create_initial_frontier(self):
-        initial_frontier = self.neighbors(self.start_node)
-        for node in initial_frontier:
-            node_cost, heuristic_cost, new_total_distance = self.heuristic_cost_estimate(0, self.start_node, node,
-                                                                                         self.goal_node)
-            self.frontier[node] = {'f': node_cost, 'h': heuristic_cost, 'g': new_total_distance,
-                                   'full_path': [self.start_node]}
+        self._frontier = {}
+        self._real_dist, self._direct_dist = DataLoader(real_dist_path, direct_dist_path).return_dicts()
 
     def calculate_A_star(self, start_node, goal_node):
         self.start_node = start_node
         self.goal_node = goal_node
         self.create_initial_frontier()
-        while self.frontier:
-            print(f'Current frontier nodes: {list(self.frontier.keys())}')
-            current_node = min(self.frontier, key=lambda k: self.frontier[k]['f'])
-            print(
-                f'selected node: {current_node} | f: {self.frontier[current_node]["f"]} | h: {self.frontier[current_node]["h"]} | g: {self.frontier[current_node]["g"]} | path: {self.frontier[current_node]["full_path"]}')
-            if current_node == self.goal_node:
-                print(
-                    f'Found goal node: {current_node} | path: {self.frontier[current_node]["full_path"]} | f: {self.frontier[current_node]["f"]} | h: {self.frontier[current_node]["h"]} | g: {self.frontier[current_node]["g"]}')
+
+        while True:
+            # TODO: ordernar os nos da fronteira de maneira decrescente do custo
+            # duvida: Em algumas etapas o caminho nao e atualizado, por que?
+            print(f'Current frontier nodes: {list(self._frontier.keys())}')
+
+            current_node = min(self._frontier, key=lambda k: self._frontier[k]["f"])
+
+            f = self._frontier[current_node]["f"]
+            g = self._frontier[current_node]["g"]
+            h = self._frontier[current_node]["h"]
+            full_path = self._frontier[current_node]["full_path"]
+
+            found_node = current_node == self.goal_node
+
+            if found_node:
+                text = "Found goal"
+            else:
+                text = "Selected"
+
+
+            print(f"{text} node: {current_node} | f: {f} | g: {g} | h: {h} | path: {full_path}\n")
+
+            if found_node:
                 break
-            current_node_cost = self.frontier[current_node]['f']
-            current_node_path = self.frontier[current_node]['full_path']
-            del self.frontier[current_node]
-            for neighbor_node in self.neighbors(current_node):
-                node_cost, heuristic_cost, new_total_distance = self.heuristic_cost_estimate(current_node_cost,
-                                                                                             current_node,
-                                                                                             neighbor_node,
-                                                                                             self.goal_node)
-                self.frontier[neighbor_node] = {'f': node_cost, 'h': heuristic_cost, 'g': new_total_distance,
-                                                'full_path': current_node_path + [current_node]}
+
+            del self._frontier[current_node]
+
+            for neighbor_node in self._get_neighbors(current_node):
+                node_cost, heuristic_cost, new_total_distance = self._heuristic_cost_estimate(
+                    f,
+                    current_node,
+                    neighbor_node,
+                    self.goal_node
+                )
+                self._update_frontier(
+                    node=neighbor_node,
+                    f=node_cost,
+                    g=new_total_distance,
+                    h=heuristic_cost,
+                    full_path=full_path + [current_node]
+                )
+
+
+    def create_initial_frontier(self):
+        initial_frontier = self._get_neighbors(self.start_node)
+        for node in initial_frontier:
+            node_cost, heuristic_cost, new_total_distance = self._heuristic_cost_estimate(
+                0,
+                self.start_node,
+                node,
+                self.goal_node
+            )
+            self._update_frontier(
+                node=node,
+                f=node_cost,
+                g=new_total_distance,
+                h=heuristic_cost,
+                full_path=[self.start_node]
+            )
+
+    def _get_neighbors(self, node):
+        return list(self._real_dist[node].keys())
+
+    def _update_frontier(self, node, f, g, h, full_path):
+        self._frontier[node] = {
+            # f(n) = g(n) + h(n)
+            "f": f,
+            # g(n) = distancia de n ao no inicial
+            "g": g,
+            # h(n) = distancia estimada de n ao no final
+            "h": h,
+            "full_path": full_path
+        }
+
+    def _straight_distance_between(self, n1, n2):
+        if n1 == n2:
+            return 0
+        return self._direct_dist[n1][n2]
+
+    def _real_distance_between(self, n1, n2):
+        if n1 == n2:
+            return 0
+        return self._real_dist[n1][n2]
+
+    def _heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node):
+        # Current total distance + real distance between current node and next node + straight distance between next node and goal node
+        new_total_distance = current_total_distance + self._real_distance_between(current_node, next_node)
+        heuristic_cost = self._straight_distance_between(next_node, goal_node)
+        node_cost = new_total_distance + heuristic_cost
+        return node_cost, heuristic_cost, new_total_distance
