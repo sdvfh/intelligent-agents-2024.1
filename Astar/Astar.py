@@ -35,15 +35,12 @@ class Astar():
         para o próximo nó. Se as linhas forem diferentes, retorna o tempo de troca de linha;
         caso contrário, retorna 0.
         """
-        previous_lines = set(self.node_lines[previous_node])
-        current_lines = set(self.node_lines[current_node])
-        next_lines = set(self.node_lines[next_node])
         
         # Intersecção entre as linhas do nó anterior e do nó atual - linhas que podemos estar chegando
-        arrival_lines = previous_lines.intersection(current_lines)
+        arrival_lines = self.node_lines[previous_node].intersection(self.node_lines[current_node])
         
         # Intersecção entre as linhas do nó atual e do próximo nó - linhas pelas quais podemos partir
-        departure_lines = current_lines.intersection(next_lines)
+        departure_lines = self.node_lines[current_node].intersection(self.node_lines[next_node])
         
         # Se não há sobreposição entre as linhas de chegada e partida, precisamos de uma baldeação
         if arrival_lines.isdisjoint(departure_lines):

@@ -7,20 +7,20 @@ class DataLoader():
         self.straightline_distances = {}
         # Variável que representa qual linha do metrô cada nó pertence
         self.node_lines = {
-            'E1': ['R'],
-            'E2': ['R','G'],
-            'E3': ['R','B'],
-            'E4': ['R','Y'],
-            'E5': ['Y'],
-            'E6': ['B'],
-            'E7': ['B','G'],
-            'E8': ['B','Y'],
-            'E9': ['G','Y'],
-            'E10': ['G','B'],
-            'E11': ['Y'],
-            'E12': ['B'],
-            'E13': ['G'],
-            'E14': ['R']
+            'E1': {'R'},
+            'E2': {'R','G'},
+            'E3': {'R','B'},
+            'E4': {'R','Y'},
+            'E5': {'Y'},
+            'E6': {'B'},
+            'E7': {'B','G'},
+            'E8': {'B','Y'},
+            'E9': {'G','Y'},
+            'E10': {'G','B'},
+            'E11': {'Y'},
+            'E12': {'B'},
+            'E13': {'G'},
+            'E14': {'R'}
         }
         # Dataframe com distancias reais para calcular g(n) = distância de n ao nó inicial
         self.real_dist_df = pd.read_csv(real_dist_path).rename(columns={'Unnamed: 0': 'node'})
