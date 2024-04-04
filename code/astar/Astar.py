@@ -6,7 +6,6 @@ class Astar():
         self.goal_node = None
         self._frontier = {}
         self._real_dist, self._direct_dist,self.node_lines = DataLoader(real_dist_path, direct_dist_path,node_lines_path).return_dicts()
-        
 
     def calculate_A_star(self, start_node, goal_node):
         self.start_node = start_node
@@ -18,12 +17,11 @@ class Astar():
             # Sort the items of the dictionary based on the 'f' value
             sorted_items = sorted(self._frontier.items(), key=lambda x: x[1]['f'])
 
-            # Create an auxiliary dictionary with the sorted order
-            aux_dict = {key: value['f'] for key, value in sorted_items}
+            print(f'\nCurrent frontier nodes:')
+            for node,values in sorted_items:
+                print(f'Node: {node} | f: {self._frontier[node]["f"]:.2f} | g: {self._frontier[node]["g"]:.2f} | h: {self._frontier[node]["h"]:.2f} | path: {self._frontier[node]["full_path"]}')
 
-            print(f'Current frontier nodes: {aux_dict}')
-
-            current_node = min(self._frontier, key=lambda k: self._frontier[k]["f"])
+            current_node = sorted_items[0][0]
 
             f = self._frontier[current_node]["f"]
             g = self._frontier[current_node]["g"]
@@ -38,7 +36,7 @@ class Astar():
                 text = "Selected"
 
 
-            print(f"{text} node: {current_node} | f: {f:.2f} | g: {g:.2f} | h: {h:.2f} | path: {full_path}\n")
+            print(f"\n{text} node: {current_node} | f: {f:.2f} | g: {g:.2f} | h: {h:.2f} | path: {full_path}\n")
 
             if found_node:
                 break
@@ -54,7 +52,7 @@ class Astar():
                     self.goal_node,
                     line_change
                 )
-                
+
                 self._update_frontier(
                     node=neighbor_node,
                     f=node_cost,
@@ -115,7 +113,7 @@ class Astar():
 
         # Se não há sobreposição entre as linhas de chegada e partida, precisamos de uma baldeação
         if arrival_lines.isdisjoint(departure_lines):
-            print(f"Baldeação necessária para ir de {current_node} para {next_node}, vindo de {previous_node}")
+            print(f"Baldeação necessária para ir de {current_node} para {next_node}, vindo de {previous_node} da linha {list(arrival_lines)[0]} para a linha {list(departure_lines)[0]}")
             return True
         return False 
     
