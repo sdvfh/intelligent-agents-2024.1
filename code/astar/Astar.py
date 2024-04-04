@@ -47,17 +47,18 @@ class Astar():
 
             for neighbor_node in self._get_neighbors(current_node):
                 line_change = self._verify_line_change(full_path[-1],current_node,neighbor_node)
-                node_cost, heuristic_cost, new_total_distance = self._heuristic_cost_estimate(
-                    f,
+                node_cost, heuristic_cost, new_total_time = self._heuristic_cost_estimate(
+                    g,
                     current_node,
                     neighbor_node,
                     self.goal_node,
                     line_change
                 )
+                
                 self._update_frontier(
                     node=neighbor_node,
                     f=node_cost,
-                    g=new_total_distance,
+                    g=new_total_time,
                     h=heuristic_cost,
                     full_path=full_path + [current_node]
                 )
@@ -66,7 +67,7 @@ class Astar():
     def create_initial_frontier(self):
         initial_frontier = self._get_neighbors(self.start_node)
         for node in initial_frontier:
-            node_cost, heuristic_cost, new_total_distance = self._heuristic_cost_estimate(
+            node_cost, heuristic_cost, new_total_time = self._heuristic_cost_estimate(
                 0,
                 self.start_node,
                 node,
@@ -75,7 +76,7 @@ class Astar():
             self._update_frontier(
                 node=node,
                 f=node_cost,
-                g=new_total_distance,
+                g=new_total_time,
                 h=heuristic_cost,
                 full_path=[self.start_node]
             )
@@ -118,11 +119,11 @@ class Astar():
             return True
         return False 
     
-    def _heuristic_cost_estimate(self, current_total_distance, current_node, next_node, goal_node,line_change=False):
+    def _heuristic_cost_estimate(self, current_total_time, current_node, next_node, goal_node,line_change=False):
         # Current total distance + real distance between current node and next node + straight distance between next node and goal node
-        new_total_distance = current_total_distance + self._real_distance_between(current_node, next_node)
+        new_total_time = current_total_time + self._real_distance_between(current_node, next_node)
         if line_change:
-            new_total_distance += 3
+            new_total_time += 3
         heuristic_cost = self._straight_distance_between(next_node, goal_node)
-        node_cost = new_total_distance + heuristic_cost
-        return round(node_cost,2), round(heuristic_cost,2), round(new_total_distance,2)
+        node_cost = new_total_time + heuristic_cost
+        return round(node_cost,2), round(heuristic_cost,2), round(new_total_time,2)
